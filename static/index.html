@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ClimaVerse AI - Cosmic Weather & AI Oracle</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -13,156 +13,452 @@
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="mobile.css">
     <style>
-        body {
-            background: linear-gradient(135deg, #0a0a23, #1e3a8a);
-            min-height: 100vh;
-            font-family: 'Poppins', sans-serif;
-            color: #ffffff;
-            overflow-x: hidden;
-            position: relative;
-        }
-        #three-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            opacity: 0.7;
-        }
-        #particles-js {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-        }
-        .container {
-            position: relative;
-            z-index: 10;
-        }
-        .holographic-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(25px);
-            border: 2px solid rgba(0, 255, 255, 0.3);
-            border-radius: 24px;
-            box-shadow: 0 12px 50px rgba(0, 0, 0, 0.4), inset 0 0 25px rgba(0, 255, 255, 0.2);
-            transition: transform 0.6s ease, box-shadow 0.6s ease;
-            transform-style: preserve-3d;
-        }
-        .holographic-card:hover {
-            transform: translateY(-12px) rotateX(10deg) rotateY(5deg);
-            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5), inset 0 0 35px rgba(0, 255, 255, 0.4);
-        }
-        .suggestion {
-            cursor: pointer;
-            padding: 14px;
-            background: rgba(255, 255, 255, 0.1);
-            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-            transition: background 0.3s ease, transform 0.3s ease;
-        }
-        .suggestion:hover {
-            background: rgba(0, 255, 255, 0.3);
-            transform: scale(1.05);
-        }
-        #map, .chat-map {
-            height: 400px;
-            border-radius: 20px;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-            border: 2px solid rgba(0, 255, 255, 0.4);
-        }
-        .input-neon {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(0, 255, 255, 0.4);
-            color: #ffffff;
-            border-radius: 16px;
-            padding: 18px;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
-            transition: box-shadow 0.4s ease;
-        }
-        .input-neon:focus {
-            box-shadow: 0 0 40px rgba(0, 255, 255, 0.9), 0 0 60px rgba(255, 0, 204, 0.6);
-            outline: none;
-        }
-        .button-neon {
-            background: linear-gradient(45deg, #00f7ff, #ff00cc);
-            border: none;
-            border-radius: 16px;
-            padding: 18px;
-            font-weight: 600;
-            text-transform: uppercase;
-            box-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
-            transition: transform 0.4s ease, box-shadow 0.4s ease;
-        }
-        .button-neon:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 0 50px rgba(0, 255, 255, 0.9), 0 0 70px rgba(255, 0, 204, 0.6);
-        }
-        .chat-bubble {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 18px;
-            margin-bottom: 18px;
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            transition: transform 0.5s ease, box-shadow 0.5s ease;
-        }
-        .chat-bubble:hover {
-            transform: scale(1.03);
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
-        }
-        .weather-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 5;
-        }
-        .recent-city {
-            cursor: pointer;
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 30px;
-            transition: background 0.3s ease, transform 0.3s ease;
-        }
-        .recent-city:hover {
-            background: rgba(0, 255, 255, 0.4);
-            transform: scale(1.1);
-        }
-        .quick-reply {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            border-radius: 12px;
-            padding: 10px 20px;
-            margin: 4px;
-            transition: background 0.3s ease, transform 0.3s ease;
-        }
-        .quick-reply:hover {
-            background: rgba(0, 255, 255, 0.3);
-            transform: scale(1.05);
-        }
-        .typing-indicator {
-            display: none;
-            font-size: 16px;
-            color: rgba(255, 255, 255, 0.8);
-            text-align: center;
-            margin-bottom: 16px;
-        }
-        .typing-indicator span {
-            animation: blink 1s infinite;
-        }
-        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-        h1, h2, h3 {
-            font-family: 'Exo 2', sans-serif;
-        }
+body {
+    background: linear-gradient(135deg, #0a0a23, #1e3a8a);
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    color: #ffffff;
+    overflow-x: hidden;
+    position: relative;
+    margin: 0;
+    font-size: clamp(12px, 2.2vmin, 14px);
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent; /* Prevent tap highlight on mobile */
+}
+
+#three-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    opacity: 0.5; /* Lower opacity for mobile performance */
+    will-change: transform;
+    display: none; /* Disable on small screens by default, enabled in JS if needed */
+}
+
+#particles-js {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    display: none; /* Disable on small screens by default */
+}
+
+.container {
+    position: relative;
+    z-index: 10;
+    padding: clamp(0.5rem, 3vmin, 1rem);
+    max-width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.holographic-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: clamp(0.4rem, 1.5vmin, 0.6rem);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+    padding: clamp(0.5rem, 2.5vmin, 1rem);
+    box-sizing: border-box;
+    backdrop-filter: none; /* Disable blur on mobile for performance */
+}
+
+.holographic-card:hover,
+.holographic-card:active {
+    transform: translateY(-0.2rem);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+}
+
+.suggestion {
+    cursor: pointer;
+    padding: clamp(0.4rem, 2vmin, 0.6rem);
+    background: rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+    transition: background 0.2s ease, transform 0.2s ease;
+    font-size: clamp(0.8rem, 2vmin, 0.9rem);
+    touch-action: manipulation;
+}
+
+.suggestion:hover,
+.suggestion:active {
+    background: rgba(0, 255, 255, 0.3);
+    transform: scale(1.02);
+}
+
+#map,
+.chat-map {
+    height: clamp(100px, 30vh, 200px);
+    width: 100%;
+    border-radius: clamp(0.4rem, 1.5vmin, 0.6rem);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    box-sizing: border-box;
+}
+
+.input-neon {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    color: #ffffff;
+    border-radius: clamp(0.3rem, 1.2vmin, 0.5rem);
+    padding: clamp(0.4rem, 2vmin, 0.6rem);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+    transition: box-shadow 0.2s ease;
+    font-size: clamp(0.8rem, 2vmin, 0.9rem);
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 44px; /* Ensure touch target size */
+}
+
+.input-neon:focus {
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
+    outline: none;
+}
+
+.button-neon {
+    background: linear-gradient(45deg, #00f7ff, #ff00cc);
+    border: none;
+    border-radius: clamp(0.3rem, 1.2vmin, 0.5rem);
+    padding: clamp(0.4rem, 2vmin, 0.6rem);
+    font-weight: 600;
+    text-transform: uppercase;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    font-size: clamp(0.8rem, 2vmin, 0.9rem);
+    width: 100%;
+    cursor: pointer;
+    touch-action: manipulation;
+    min-height: 44px;
+}
+
+.button-neon:hover,
+.button-neon:active {
+    transform: scale(0.98); /* Subtle press effect */
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
+}
+
+.chat-bubble {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: clamp(0.4rem, 1.5vmin, 0.6rem);
+    padding: clamp(0.4rem, 2vmin, 0.6rem);
+    margin-bottom: clamp(0.4rem, 1.5vmin, 0.6rem);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    font-size: clamp(0.8rem, 2vmin, 0.9rem);
+}
+
+.chat-bubble:hover,
+.chat-bubble:active {
+    transform: scale(1.01);
+}
+
+.weather-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    display: none; /* Disable on mobile for performance */
+}
+
+.recent-city {
+    cursor: pointer;
+    padding: clamp(0.3rem, 1.2vmin, 0.5rem) clamp(0.5rem, 1.8vmin, 0.7rem);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: clamp(0.5rem, 1.5vmin, 0.75rem);
+    transition: background 0.2s ease, transform 0.2s ease;
+    font-size: clamp(0.8rem, 2vmin, 0.9rem);
+    min-height: 44px;
+}
+
+.recent-city:hover,
+.recent-city:active {
+    background: rgba(0, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.quick-reply {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-radius: clamp(0.3rem, 1.2vmin, 0.5rem);
+    padding: clamp(0.3rem, 1.2vmin, 0.5rem) clamp(0.5rem, 1.8vmin, 0.7rem);
+    margin: clamp(0.2rem, 1vmin, 0.3rem);
+    transition: background 0.2s ease, transform 0.2s ease;
+    font-size: clamp(0.8rem, 2vmin, 0.9rem);
+    cursor: pointer;
+    min-height: 44px;
+}
+
+.quick-reply:hover,
+.quick-reply:active {
+    background: rgba(0, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.typing-indicator {
+    display: none;
+    font-size: clamp(0.8rem, 2vmin, 0.9rem);
+    color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    margin-bottom: clamp(0.4rem, 1.5vmin, 0.6rem);
+}
+
+.typing-indicator span {
+    animation: blink 1s infinite;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+h1, h2, h3 {
+    font-family: 'Exo 2', sans-serif;
+    line-height: 1.2;
+}
+
+/* Responsive Typography */
+h1 {
+    font-size: clamp(1.5rem, 6vmin, 2.5rem);
+}
+
+h2 {
+    font-size: clamp(1.2rem, 4.5vmin, 1.8rem);
+}
+
+h3 {
+    font-size: clamp(0.9rem, 3vmin, 1.2rem);
+}
+
+/* Dynamic Layouts */
+#weatherDetails {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(0.4rem, 1.5vmin, 0.6rem);
+}
+
+#recentCities,
+#quickReplies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(0.4rem, 1.5vmin, 0.6rem);
+    justify-content: center;
+}
+
+/* Media Queries for All Mobile Devices */
+@media (min-width: 576px) {
+    .container {
+        padding: clamp(0.75rem, 2.5vmin, 1.25rem);
+    }
+
+    #weatherDetails {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    h1 {
+        font-size: clamp(1.8rem, 7vmin, 3rem);
+    }
+}
+
+@media (min-width: 768px) {
+    .container {
+        max-width: 95%;
+    }
+
+    #weatherDetails {
+        grid-template-columns: 2fr 1fr;
+    }
+
+    #map,
+    .chat-map {
+        height: clamp(150px, 35vh, 250px);
+    }
+
+    .holographic-card {
+        padding: clamp(0.75rem, 2.5vmin, 1.25rem);
+    }
+
+    #three-canvas,
+    #particles-js {
+        display: block; /* Re-enable animations on larger screens */
+    }
+}
+
+@media (min-width: 1024px) {
+    .container {
+        max-width: 90%;
+    }
+
+    #map,
+    .chat-map {
+        height: clamp(200px, 40vh, 300px);
+    }
+
+    h1 {
+        font-size: clamp(2rem, 8vmin, 4rem);
+    }
+}
+
+@media (min-width: 1440px) {
+    .container {
+        max-width: 1200px;
+    }
+
+    .holographic-card {
+        padding: clamp(1rem, 3vmin, 1.5rem);
+    }
+}
+
+@media (max-width: 576px) {
+    body {
+        font-size: clamp(11px, 2vmin, 13px);
+    }
+
+    .container {
+        padding: clamp(0.4rem, 1.5vmin, 0.75rem);
+    }
+
+    .holographic-card {
+        padding: clamp(0.4rem, 1.5vmin, 0.75rem);
+        border-radius: 0.4rem;
+    }
+
+    #map,
+    .chat-map {
+        height: clamp(80px, 25vh, 150px);
+    }
+
+    .button-neon,
+    .input-neon {
+        padding: clamp(0.3rem, 1.2vmin, 0.5rem);
+        font-size: clamp(0.75rem, 1.8vmin, 0.85rem);
+    }
+
+    .recent-city,
+    .quick-reply,
+    .suggestion {
+        padding: clamp(0.2rem, 1vmin, 0.4rem);
+        font-size: clamp(0.75rem, 1.8vmin, 0.85rem);
+    }
+
+    #chatMode .holographic-card {
+        max-height: 65vh;
+    }
+}
+
+@media (max-width: 360px) {
+    body {
+        font-size: 11px;
+    }
+
+    h1 {
+        font-size: clamp(1.2rem, 5vmin, 2rem);
+    }
+
+    h2 {
+        font-size: clamp(1rem, 3.5vmin, 1.5rem);
+    }
+
+    .container {
+        padding: clamp(0.3rem, 1vmin, 0.5rem);
+    }
+
+    .button-neon,
+    .input-neon {
+        padding: 0.3rem;
+        font-size: 0.75rem;
+    }
+
+    #map,
+    .chat-map {
+        height: clamp(70px, 20vh, 120px);
+    }
+}
+
+@media (max-width: 320px) {
+    body {
+        font-size: 10px;
+    }
+
+    h1 {
+        font-size: clamp(1rem, 4.5vmin, 1.8rem);
+    }
+
+    .holographic-card {
+        padding: 0.3rem;
+    }
+
+    .button-neon,
+    .input-neon {
+        padding: 0.25rem;
+        font-size: 0.7rem;
+    }
+}
+
+/* Handle foldables and unusual aspect ratios */
+@media (max-aspect-ratio: 1/1) {
+    #map,
+    .chat-map {
+        height: clamp(70px, 20vh, 150px);
+    }
+
+    .container {
+        padding: clamp(0.3rem, 1.5vmin, 0.6rem);
+    }
+
+    #weatherDetails {
+        gap: clamp(0.3rem, 1vmin, 0.5rem);
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) {
+    .holographic-card:hover,
+    .button-neon:hover,
+    .suggestion:hover,
+    .recent-city:hover,
+    .quick-reply:hover,
+    .chat-bubble:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .button-neon:active,
+    .suggestion:active,
+    .recent-city:active,
+    .quick-reply:active,
+    .chat-bubble:active {
+        transform: scale(0.95);
+    }
+}
+
+/* High-density displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .holographic-card {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .input-neon,
+    .button-neon {
+        box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+    }
+}
     </style>
 </head>
 <body>
@@ -176,132 +472,144 @@
     <div id="weatherAnimation" class="weather-animation"></div>
 
     <!-- Main Container -->
-    <div class="container mx-auto p-10 max-w-7xl mt-16">
-        <header class="text-center mb-20">
-            <h1 class="text-9xl font-bold text-white drop-shadow-[0_0_30px_rgba(0,255,255,0.9)]">ClimaVerse AI</h1>
-            <p class="text-3xl text-white/80 mt-6 font-light">Your Galactic Weather Explorer & AI Oracle</p>
+    <div class="container mx-auto max-w-7xl">
+        <header class="text-center mb-6">
+            <h1 class="font-bold text-4xl sm:text-9xl">ClimaVerse AI</h1>
+            <p class="text-sm mt-2 sm:text-3xl">Your Galactic Weather Explorer & AI Oracle</p>
         </header>
 
         <!-- Mode Toggle -->
-        <div class="flex justify-center mb-16">
-            <button id="weatherModeBtn" class="px-14 py-5 button-neon text-xl">Weather Cosmos</button>
-            <button id="chatModeBtn" class="px-14 py-5 bg-gray-900 text-white rounded-r-full font-bold text-xl hover:bg-gray-950 transition">AI Nexus</button>
+        <div class="flex justify-center gap-2 mb-6">
+            <button id="weatherModeBtn" class="button-neon px-4 py-2 sm:px-14 sm:py-5 sm:text-xl">Weather Cosmos</button>
+            <button id="chatModeBtn" class="px-4 py-2 sm:px-14 sm:py-5 sm:text-xl bg-gray-900 text-white font-bold hover:bg-gray-950 transition">AI Nexus</button>
         </div>
 
         <!-- Weather Mode -->
-        <div id="weatherMode" class="holographic-card p-14">
-            <h2 class="text-6xl font-bold text-white mb-10 text-center">Explore the Cosmos</h2>
-            <form id="weatherForm" class="relative mb-12">
-                <input type="text" id="cityInput" placeholder="Search a city (e.g., Mumbai)" class="w-full input-neon text-xl" autocomplete="off" required>
-                <div id="suggestions" class="absolute w-full bg-black/95 rounded-2xl shadow-2xl mt-3 max-h-72 overflow-y-auto hidden z-40"></div>
-                <button type="submit" class="w-full mt-6 button-neon text-xl">Discover Weather</button>
+        <div id="weatherMode" class="holographic-card p-4 sm:p-14">
+            <h2 class="text-2xl sm:text-6xl font-bold mb-4 sm:mb-10 text-center">Explore the Cosmos</h2>
+            <form id="weatherForm" class="relative mb-4 sm:mb-12">
+                <label for="cityInput" class="sr-only">Search city</label>
+                <input type="text" id="cityInput" placeholder="Search a city (e.g., Mumbai)" class="w-full input-neon text-base sm:text-xl" autocomplete="off" required aria-required="true">
+                <div id="suggestions" class="absolute w-full bg-black/95 rounded-lg shadow-lg mt-1 sm:mt-3 max-h-48 sm:max-h-72 overflow-y-auto hidden z-40"></div>
+                <button type="submit" class="w-full mt-4 button-neon text-base sm:text-xl">Discover Weather</button>
             </form>
-            <div id="recentCities" class="flex flex-wrap gap-6 mb-10 justify-center"></div>
-            <div id="weatherDetails" class="grid grid-cols-1 xl:grid-cols-3 gap-10">
-                <div class="col-span-1 xl:col-span-2 space-y-8">
-                    <div class="flex items-center space-x-10 bg-white/5 p-8 rounded-2xl">
-                        <img id="weatherIcon" src="https://openweathermap.org/img/wn/01d@2x.png" alt="Weather Icon" class="w-32 h-32">
+            <div id="recentCities" class="flex flex-wrap gap-2 sm:gap-6 mb-4 sm:mb-10 justify-center"></div>
+            <div id="weatherDetails" class="grid grid-cols-1 gap-4 sm:gap-10">
+                <div class="space-y-4 sm:space-y-8">
+                    <div class="flex items-center space-x-4 sm:space-x-10 bg-white/5 p-4 sm:p-8 rounded-lg sm:rounded-2xl">
+                        <img id="weatherIcon" src="https://openweathermap.org/img/wn/01d@2x.png" alt="Weather Icon" class="w-16 h-16 sm:w-32 sm:h-32">
                         <div>
-                            <p id="cityName" class="text-5xl font-bold text-white">Enter a city</p>
-                            <p id="temperature" class="text-7xl font-extrabold text-white">25°C</p>
-                            <p id="description" class="text-3xl text-white/80 capitalize">Sunny</p>
+                            <p id="cityName" class="text-2xl sm:text-5xl font-bold">Enter a city</p>
+                            <p id="temperature" class="text-3xl sm:text-7xl font-extrabold">25°C</p>
+                            <p id="description" class="text-base sm:text-3xl capitalize">Sunny</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-6 text-white/90">
-                        <div class="bg-white/10 p-6 rounded-2xl">Humidity: <span id="humidity">60%</span></div>
-                        <div class="bg-white/10 p-6 rounded-2xl">Wind: <span id="wind">5 m/s</span></div>
-                        <div class="bg-white/10 p-6 rounded-2xl">Pressure: <span id="pressure">1012 hPa</span></div>
-                        <div class="bg-white/10 p-6 rounded-2xl">AQI: <span id="aqi">N/A</span></div>
+                    <div class="grid grid-cols-2 gap-2 sm:gap-6 text-sm sm:text-base">
+                        <div class="bg-white/10 p-3 sm:p-6 rounded-lg sm:rounded-2xl">Humidity: <span id="humidity">60%</span></div>
+                        <div class="bg-white/10 p-3 sm:p-6 rounded-lg sm:rounded-2xl">Wind: <span id="wind">5 m/s</span></div>
+                        <div class="bg-white/10 p-3 sm:p-6 rounded-lg sm:rounded-2xl">Pressure: <span id="pressure">1012 hPa</span></div>
+                        <div class="bg-white/10 p-3 sm:p-6 rounded-lg sm:rounded-2xl">AQI: <span id="aqi">N/A</span></div>
                     </div>
                 </div>
-                <div id="map"></div>
+                <div id="map" class="mt-4"></div>
             </div>
         </div>
 
         <!-- AI Chat Mode -->
         <div id="chatMode" class="hidden">
-            <div class="holographic-card p-14 max-h-[800px] overflow-y-auto" id="chatBox">
+            <div class="holographic-card p-4 sm:p-14 max-h-[60vh] sm:max-h-[800px] overflow-y-auto" id="chatBox">
                 <div class="chat-bubble">
-                    <p class="text-white/90 text-xl">Welcome to ClimaVerse AI! Ask about weather (e.g., "Weather in Tokyo") or dive into the universe!</p>
-                    <span class="text-white/50 text-sm block mt-2">Just now</span>
+                    <p class="text-sm sm:text-xl">Welcome to ClimaVerse AI! Ask about weather (e.g., "Weather in Tokyo") or dive into the universe!</p>
+                    <span class="text-xs sm:text-sm block mt-1 sm:mt-2 opacity-50">Just now</span>
                 </div>
             </div>
-            <div class="flex justify-between mt-6">
-                <button id="clearChatBtn" class="px-6 py-3 button-neon text-sm">Clear Chat</button>
-                <button id="exportChatBtn" class="px-6 py-3 button-neon text-sm">Export Chat</button>
+            <div class="flex justify-between mt-4 gap-2">
+                <button id="clearChatBtn" class="button-neon px-4 py-2 sm:px-6 sm:py-3 text-sm">Clear Chat</button>
+                <button id="exportChatBtn" class="button-neon px-4 py-2 sm:px-6 sm:py-3 text-sm">Export Chat</button>
             </div>
             <div class="typing-indicator">
                 ClimaVerse AI is thinking<span>.</span><span>.</span><span>.</span>
             </div>
-            <div id="quickReplies" class="flex flex-wrap gap-4 mt-6 justify-center"></div>
-            <form id="chatForm" class="relative mt-6">
-                <input type="text" id="chatInput" name="content" placeholder="Ask about weather or anything..." class="w-full input-neon text-xl" required>
-                <button type="submit" class="w-full mt-6 button-neon text-xl">Send Query</button>
+            <div id="quickReplies" class="flex flex-wrap gap-2 sm:gap-4 mt-4 justify-center"></div>
+            <form id="chatForm" class="relative mt-4">
+                <label for="chatInput" class="sr-only">Ask a question</label>
+                <input type="text" id="chatInput" name="content" placeholder="Ask about weather or anything..." class="w-full input-neon text-base sm:text-xl" required aria-required="true">
+                <button type="submit" class="w-full mt-4 button-neon text-base sm:text-xl">Send Query</button>
             </form>
         </div>
     </div>
 
     <script>
-        // Three.js 3D Background
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById("three-canvas").appendChild(renderer.domElement);
-        const geometry = new THREE.SphereGeometry(0.5, 32, 32);
-        const material = new THREE.MeshBasicMaterial({ color: 0x00f7ff, wireframe: true });
-        const spheres = [];
-        for (let i = 0; i < 50; i++) {
-            const sphere = new THREE.Mesh(geometry, material);
-            sphere.position.set(
-                (Math.random() - 0.5) * 100,
-                (Math.random() - 0.5) * 100,
-                (Math.random() - 0.5) * 100
-            );
-            scene.add(sphere);
-            spheres.push(sphere);
-        }
-        camera.position.z = 50;
-        function animate() {
-            requestAnimationFrame(animate);
-            spheres.forEach(s => {
-                s.rotation.x += 0.01;
-                s.rotation.y += 0.01;
-            });
-            renderer.render(scene, camera);
-        }
-        animate();
-        window.addEventListener("resize", () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        // Initialize Animations (Disabled on Mobile)
+        function initAnimations() {
+            if (window.innerWidth >= 768) {
+                document.getElementById('three-canvas').style.display = 'block';
+                document.getElementById('particles-js').style.display = 'block';
+                document.getElementById('weatherAnimation').style.display = 'block';
 
-        // Particles.js
-        particlesJS("particles-js", {
-            particles: {
-                number: { value: 120, density: { enable: true, value_area: 1200 } },
-                color: { value: ["#00f7ff", "#ff00cc", "#ffffff"] },
-                shape: { type: "circle" },
-                opacity: { value: 0.7, random: true },
-                size: { value: 5, random: true },
-                line_linked: { enable: true, distance: 200, color: "#00f7ff", opacity: 0.4, width: 1.5 },
-                move: { enable: true, speed: 4, direction: "none", random: true }
-            },
-            interactivity: {
-                detect_on: "canvas",
-                events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: true, mode: "push" } },
-                modes: { grab: { distance: 250, line_linked: { opacity: 0.6 } }, push: { particles_nb: 5 } }
+                // Three.js
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ alpha: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                document.getElementById("three-canvas").appendChild(renderer.domElement);
+                const geometry = new THREE.SphereGeometry(0.5, 16, 16);
+                const material = new THREE.MeshBasicMaterial({ color: 0x00f7ff, wireframe: true });
+                const spheres = [];
+                for (let i = 0; i < 20; i++) {
+                    const sphere = new THREE.Mesh(geometry, material);
+                    sphere.position.set(
+                        (Math.random() - 0.5) * 100,
+                        (Math.random() - 0.5) * 100,
+                        (Math.random() - 0.5) * 100
+                    );
+                    scene.add(sphere);
+                    spheres.push(sphere);
+                }
+                camera.position.z = 50;
+                function animate() {
+                    requestAnimationFrame(animate);
+                    spheres.forEach(s => {
+                        s.rotation.x += 0.01;
+                        s.rotation.y += 0.01;
+                    });
+                    renderer.render(scene, camera);
+                }
+                animate();
+                window.addEventListener("resize", () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+
+                // Particles.js
+                particlesJS("particles-js", {
+                    particles: {
+                        number: { value: 40, density: { enable: true, value_area: 1000 } },
+                        color: { value: ["#00f7ff", "#ff00cc", "#ffffff"] },
+                        shape: { type: "circle" },
+                        opacity: { value: 0.6, random: true },
+                        size: { value: 4, random: true },
+                        line_linked: { enable: true, distance: 150, color: "#00f7ff", opacity: 0.3, width: 1 },
+                        move: { enable: true, speed: 3, direction: "none", random: true }
+                    },
+                    interactivity: {
+                        detect_on: "canvas",
+                        events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: true, mode: "push" } },
+                        modes: { grab: { distance: 200, line_linked: { opacity: 0.5 } }, push: { particles_nb: 4 } }
+                    }
+                });
             }
-        });
+        }
+        initAnimations();
+        window.addEventListener('resize', initAnimations);
 
-        // GSAP Animations
-        gsap.from(".container", { duration: 1.8, y: 200, opacity: 0, ease: "power4.out" });
-        gsap.from("header", { duration: 1.5, delay: 0.5, opacity: 0, scale: 0.6, ease: "back.out(3)" });
-        gsap.from(".holographic-card", { duration: 1.2, delay: 1, opacity: 0, y: 100, stagger: 0.4, ease: "power3.out" });
+        // GSAP Animations (Simplified for Mobile)
+        gsap.from(".container", { duration: 0.8, y: 50, opacity: 0, ease: "power2.out" });
+        gsap.from("header", { duration: 0.8, opacity: 0, ease: "power2.out" });
 
         // Initialize Leaflet Map
-        const map = L.map('map').setView([51.505, -0.09], 10);
+        const map = L.map('map', { zoomControl: window.innerWidth >= 768 }).setView([51.505, -0.09], 10);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
             maxZoom: 18,
@@ -319,10 +627,10 @@
         }
         function renderRecentCities() {
             const recentCitiesDiv = document.getElementById("recentCities");
-            recentCitiesDiv.innerHTML = recentCities.length ? "<h3 class='text-2xl text-white/80 mb-6 text-center'>Recent Searches</h3>" : "";
+            recentCitiesDiv.innerHTML = recentCities.length ? "<h3 class='text-lg sm:text-2xl text-white/80 mb-2 sm:mb-6 text-center'>Recent Searches</h3>" : "";
             recentCities.forEach(({ city, lat, lon }) => {
                 const div = document.createElement("div");
-                div.className = "recent-city text-white/90 text-lg";
+                div.className = "recent-city text-sm sm:text-lg";
                 div.textContent = city;
                 div.addEventListener("click", () => fetchWeather(lat, lon, city, false));
                 recentCitiesDiv.appendChild(div);
@@ -343,7 +651,7 @@
             quickRepliesDiv.innerHTML = "";
             quickReplies.forEach(reply => {
                 const btn = document.createElement("button");
-                btn.className = "quick-reply text-white/90 text-lg";
+                btn.className = "quick-reply text-sm sm:text-lg";
                 btn.textContent = reply;
                 btn.addEventListener("click", () => {
                     document.getElementById("chatInput").value = reply;
@@ -366,7 +674,7 @@
             chatMode.classList.add("hidden");
             weatherModeBtn.classList.replace("bg-gray-900", "button-neon");
             chatModeBtn.classList.replace("button-neon", "bg-gray-900");
-            gsap.from("#weatherMode", { duration: 1, opacity: 0, y: 100, ease: "power3.out" });
+            gsap.from("#weatherMode", { duration: 0.8, opacity: 0, y: 50, ease: "power2.out" });
         });
 
         chatModeBtn.addEventListener("click", () => {
@@ -374,7 +682,7 @@
             weatherMode.classList.add("hidden");
             chatModeBtn.classList.replace("bg-gray-900", "button-neon");
             weatherModeBtn.classList.replace("button-neon", "bg-gray-900");
-            gsap.from("#chatMode", { duration: 1, opacity: 0, y: 100, ease: "power3.out" });
+            gsap.from("#chatMode", { duration: 0.8, opacity: 0, y: 50, ease: "power2.out" });
         });
 
         // City Suggestions
@@ -394,7 +702,7 @@
                 if (cities.length > 0) {
                     cities.forEach(city => {
                         const div = document.createElement("div");
-                        div.className = "suggestion text-white/90 text-lg";
+                        div.className = "suggestion text-sm sm:text-lg";
                         div.textContent = `${city.name}, ${city.country}${city.state ? `, ${city.state}` : ""}`;
                         div.dataset.lat = city.lat;
                         div.dataset.lon = city.lon;
@@ -408,12 +716,12 @@
                     suggestions.classList.remove("hidden");
                     gsap.from(".suggestion", { duration: 0.5, opacity: 0, y: 20, stagger: 0.15 });
                 } else {
-                    suggestions.innerHTML = '<div class="p-5 text-white/80 text-lg">No cities found</div>';
+                    suggestions.innerHTML = '<div class="p-2 sm:p-5 text-sm sm:text-lg text-white/80">No cities found</div>';
                     suggestions.classList.remove("hidden");
                 }
             } catch (error) {
                 console.error("Error fetching city suggestions:", error);
-                suggestions.innerHTML = '<div class="p-5 text-white/80 text-lg">Error fetching suggestions</div>';
+                suggestions.innerHTML = '<div class="p-2 sm:p-5 text-sm sm:text-lg text-white/80">Error fetching suggestions</div>';
                 suggestions.classList.remove("hidden");
             }
         }, 300);
@@ -449,29 +757,29 @@
                     const weatherBubble = document.createElement("div");
                     weatherBubble.className = "chat-bubble";
                     weatherBubble.innerHTML = `
-                        <div class="bg-white/10 p-8 rounded-2xl">
-                            <h3 class="text-3xl font-bold text-white">${weatherInfo.city}</h3>
-                            <div class="flex items-center space-x-8 mt-6">
-                                <img src="${weatherInfo.icon}" alt="Weather Icon" class="w-24 h-24">
+                        <div class="bg-white/10 p-4 sm:p-8 rounded-lg sm:rounded-2xl">
+                            <h3 class="text-lg sm:text-3xl font-bold">${weatherInfo.city}</h3>
+                            <div class="flex items-center space-x-4 sm:space-x-8 mt-2 sm:mt-6">
+                                <img src="${weatherInfo.icon}" alt="Weather Icon" class="w-12 h-12 sm:w-24 sm:h-24">
                                 <div>
-                                    <p class="text-5xl font-bold text-white">${weatherInfo.temp}°C</p>
-                                    <p class="text-2xl text-white/80 capitalize">${weatherInfo.description}</p>
+                                    <p class="text-2xl sm:text-5xl font-bold">${weatherInfo.temp}°C</p>
+                                    <p class="text-base sm:text-2xl capitalize">${weatherInfo.description}</p>
                                 </div>
                             </div>
-                            <div class="grid grid-cols-2 gap-6 mt-8 text-white/90">
+                            <div class="grid grid-cols-2 gap-2 sm:gap-6 mt-4 sm:mt-8 text-sm sm:text-base">
                                 <p>Humidity: ${weatherInfo.humidity}%</p>
                                 <p>Wind: ${weatherInfo.wind} m/s</p>
                                 <p>Pressure: ${weatherInfo.pressure} hPa</p>
                                 <p>AQI: ${weatherInfo.aqiText} (${weatherInfo.aqi})</p>
                             </div>
-                            <div id="chatMap-${lat}-${lon}" class="chat-map mt-8"></div>
-                            <span class="text-white/50 text-sm block mt-4">${new Date().toLocaleString()}</span>
+                            <div id="chatMap-${lat}-${lon}" class="chat-map mt-4 sm:mt-8"></div>
+                            <span class="text-xs sm:text-sm block mt-2 sm:mt-4 opacity-50">${new Date().toLocaleString()}</span>
                         </div>
                     `;
                     chatBox.appendChild(weatherBubble);
                     chatBox.scrollTop = chatBox.scrollHeight;
 
-                    const chatMap = L.map(`chatMap-${lat}-${lon}`).setView([lat, lon], 10);
+                    const chatMap = L.map(`chatMap-${lat}-${lon}`, { zoomControl: window.innerWidth >= 768 }).setView([lat, lon], 10);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
                         maxZoom: 18,
@@ -480,7 +788,7 @@
                         .bindPopup(`<b>${cityName}</b><br>${weatherInfo.description}`)
                         .openPopup();
 
-                    gsap.from(weatherBubble, { duration: 1, opacity: 0, x: -60, ease: "power3.out" });
+                    gsap.from(weatherBubble, { duration: 0.8, opacity: 0, x: -40, ease: "power2.out" });
                 } else {
                     document.getElementById("cityName").textContent = weatherInfo.city;
                     document.getElementById("temperature").textContent = `${weatherInfo.temp}°C`;
@@ -498,10 +806,12 @@
                         .openPopup();
 
                     updateRecentCities(cityName, lat, lon);
-                    gsap.from("#weatherDetails", { duration: 1, opacity: 0, y: 60, ease: "power3.out" });
+                    gsap.from("#weatherDetails", { duration: 0.8, opacity: 0, y: 40, ease: "power2.out" });
                 }
 
-                updateWeatherAnimation(weatherInfo.description);
+                if (window.innerWidth >= 768) {
+                    updateWeatherAnimation(weatherInfo.description);
+                }
             } catch (error) {
                 console.error("Error fetching weather data:", error);
                 if (isChat) {
@@ -509,12 +819,12 @@
                     const errorBubble = document.createElement("div");
                     errorBubble.className = "chat-bubble";
                     errorBubble.innerHTML = `
-                        <p class="text-white/90 text-xl">Unable to fetch weather for ${cityName}. Please try again!</p>
-                        <span class="text-white/50 text-sm block mt-4">${new Date().toLocaleString()}</span>
+                        <p class="text-sm sm:text-xl">Unable to fetch weather for ${cityName}. Please try again!</p>
+                        <span class="text-xs sm:text-sm block mt-2 opacity-50">${new Date().toLocaleString()}</span>
                     `;
                     chatBox.appendChild(errorBubble);
                     chatBox.scrollTop = chatBox.scrollHeight;
-                    gsap.from(errorBubble, { duration: 1, opacity: 0, x: -60 });
+                    gsap.from(errorBubble, { duration: 0.8, opacity: 0, x: -40 });
                 } else {
                     alert("Unable to fetch weather data. Please try another city.");
                 }
@@ -526,9 +836,9 @@
             const weatherAnimation = document.getElementById("weatherAnimation");
             weatherAnimation.innerHTML = "";
             if (description.includes("rain")) {
-                for (let i = 0; i < 120; i++) {
+                for (let i = 0; i < 50; i++) {
                     const drop = document.createElement("div");
-                    drop.className = "absolute bg-cyan-300/60 w-1.5 h-8 rounded";
+                    drop.className = "absolute bg-cyan-300/60 w-1 h-6 rounded";
                     drop.style.left = `${Math.random() * 100}%`;
                     drop.style.top = `${Math.random() * 100}%`;
                     drop.style.animation = `rain 0.7s linear infinite`;
@@ -538,37 +848,36 @@
                 const style = document.createElement("style");
                 style.textContent = `
                     @keyframes rain {
-                        0% { transform: translateY(-30px); opacity: 1; }
+                        0% { transform: translateY(-20px); opacity: 1; }
                         100% { transform: translateY(100vh); opacity: 0; }
                     }
                 `;
                 document.head.appendChild(style);
             } else if (description.includes("snow")) {
-                for (let i = 0; i < 100; i++) {
+                for (let i = 0; i < 40; i++) {
                     const flake = document.createElement("div");
-                    flake.className = "absolute bg-white w-3 h-3 rounded-full";
+                    flake.className = "absolute bg-white w-2 h-2 rounded-full";
                     flake.style.left = `${Math.random() * 100}%`;
                     flake.style.top = `${Math.random() * 100}%`;
-                    flake.style.animation = `snow 2.5s linear infinite`;
+                    flake.style.animation = `snow 2s linear infinite`;
                     flake.style.animationDelay = `${Math.random() * 2}s`;
                     weatherAnimation.appendChild(flake);
                 }
                 const style = document.createElement("style");
                 style.textContent = `
                     @keyframes snow {
-                        0% { transform: translateY(-30px); opacity: 1; }
-                        100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+                        0% { transform: translateY(-20px); opacity: 1; }
+                        100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
                     }
                 `;
                 document.head.appendChild(style);
             } else if (description.includes("clear") || description.includes("sun")) {
-                weatherAnimation.style.background = "radial-gradient(circle at top, rgba(255, 235, 59, 0.4), transparent)";
-                for (let i = 0; i < 20; i++) {
+                for (let i = 0; i < 10; i++) {
                     const flare = document.createElement("div");
-                    flare.className = "absolute bg-yellow-300/30 w-4 h-4 rounded-full";
+                    flare.className = "absolute bg-yellow-300/30 w-3 h-3 rounded-full";
                     flare.style.left = `${Math.random() * 100}%`;
                     flare.style.top = `${Math.random() * 100}%`;
-                    flare.style.animation = `flare 3s ease-in-out infinite`;
+                    flare.style.animation = `flare 2s ease-in-out infinite`;
                     flare.style.animationDelay = `${Math.random() * 2}s`;
                     weatherAnimation.appendChild(flare);
                 }
@@ -576,7 +885,7 @@
                 style.textContent = `
                     @keyframes flare {
                         0%, 100% { transform: scale(1); opacity: 0.3; }
-                        50% { transform: scale(1.5); opacity: 0.8; }
+                        50% { transform: scale(1.3); opacity: 0.7; }
                     }
                 `;
                 document.head.appendChild(style);
@@ -614,11 +923,11 @@
         clearChatBtn.addEventListener("click", () => {
             chatBox.innerHTML = `
                 <div class="chat-bubble">
-                    <p class="text-white/90 text-xl">Welcome to ClimaVerse AI! Ask about weather (e.g., "Weather in Tokyo") or dive into the universe!</p>
-                    <span class="text-white/50 text-sm block mt-2">${new Date().toLocaleString()}</span>
+                    <p class="text-sm sm:text-xl">Welcome to ClimaVerse AI! Ask about weather (e.g., "Weather in Tokyo") or dive into the universe!</p>
+                    <span class="text-xs sm:text-sm block mt-2 opacity-50">${new Date().toLocaleString()}</span>
                 </div>
             `;
-            gsap.from(".chat-bubble", { duration: 1, opacity: 0, y: 50 });
+            gsap.from(".chat-bubble", { duration: 0.8, opacity: 0, y: 40 });
         });
 
         exportChatBtn.addEventListener("click", () => {
@@ -643,12 +952,12 @@
             const userBubble = document.createElement("div");
             userBubble.className = "chat-bubble text-right";
             userBubble.innerHTML = `
-                <p class="text-white/90 text-xl">${userInput}</p>
-                <span class="text-white/50 text-sm block mt-2">${new Date().toLocaleString()}</span>
+                <p class="text-sm sm:text-xl">${userInput}</p>
+                <span class="text-xs sm:text-sm block mt-2 opacity-50">${new Date().toLocaleString()}</span>
             `;
             chatBox.appendChild(userBubble);
             chatBox.scrollTop = chatBox.scrollHeight;
-            gsap.from(userBubble, { duration: 1, opacity: 0, x: 60 });
+            gsap.from(userBubble, { duration: 0.8, opacity: 0, x: 40 });
 
             typingIndicator.style.display = "block";
             gsap.from(".typing-indicator", { duration: 0.6, opacity: 0 });
@@ -668,24 +977,24 @@
                         const errorBubble = document.createElement("div");
                         errorBubble.className = "chat-bubble";
                         errorBubble.innerHTML = `
-                            <p class="text-white/90 text-xl">City "${city}" not found. Try another city!</p>
-                            <span class="text-white/50 text-sm block mt-2">${new Date().toLocaleString()}</span>
+                            <p class="text-sm sm:text-xl">City "${city}" not found. Try another city!</p>
+                            <span class="text-xs sm:text-sm block mt-2 opacity-50">${new Date().toLocaleString()}</span>
                         `;
                         chatBox.appendChild(errorBubble);
                         chatBox.scrollTop = chatBox.scrollHeight;
-                        gsap.from(errorBubble, { duration: 1, opacity: 0, x: -60 });
+                        gsap.from(errorBubble, { duration: 0.8, opacity: 0, x: -40 });
                     }
                 } catch (error) {
                     console.error("Error fetching city data:", error);
                     const errorBubble = document.createElement("div");
                     errorBubble.className = "chat-bubble";
                     errorBubble.innerHTML = `
-                        <p class="text-white/90 text-xl">Error fetching weather for "${city}". Please try again!</p>
-                        <span class="text-white/50 text-sm block mt-2">${new Date().toLocaleString()}</span>
+                        <p class="text-sm sm:text-xl">Error fetching weather for "${city}". Please try again!</p>
+                        <span class="text-xs sm:text-sm block mt-2 opacity-50">${new Date().toLocaleString()}</span>
                     `;
                     chatBox.appendChild(errorBubble);
                     chatBox.scrollTop = chatBox.scrollHeight;
-                    gsap.from(errorBubble, { duration: 1, opacity: 0, x: -60 });
+                    gsap.from(errorBubble, { duration: 0.8, opacity: 0, x: -40 });
                 }
             } else {
                 try {
@@ -700,23 +1009,23 @@
                     const aiBubble = document.createElement("div");
                     aiBubble.className = "chat-bubble";
                     aiBubble.innerHTML = `
-                        <p class="text-white/90 text-xl">${aiResponse || "Error: No response"}</p>
-                        <span class="text-white/50 text-sm block mt-2">${new Date().toLocaleString()}</span>
+                        <p class="text-sm sm:text-xl">${aiResponse || "Error: No response"}</p>
+                        <span class="text-xs sm:text-sm block mt-2 opacity-50">${new Date().toLocaleString()}</span>
                     `;
                     chatBox.appendChild(aiBubble);
                     chatBox.scrollTop = chatBox.scrollHeight;
-                    gsap.from(aiBubble, { duration: 1, opacity: 0, x: -60 });
+                    gsap.from(aiBubble, { duration: 0.8, opacity: 0, x: -40 });
                 } catch (error) {
                     console.error("Error fetching AI response:", error);
                     const errorBubble = document.createElement("div");
                     errorBubble.className = "chat-bubble";
                     errorBubble.innerHTML = `
-                        <p class="text-white/90 text-xl">Error: Could not connect to AI</p>
-                        <span class="text-white/50 text-sm block mt-2">${new Date().toLocaleString()}</span>
+                        <p class="text-sm sm:text-xl">Error: Could not connect to AI</p>
+                        <span class="text-xs sm:text-sm block mt-2 opacity-50">${new Date().toLocaleString()}</span>
                     `;
                     chatBox.appendChild(errorBubble);
                     chatBox.scrollTop = chatBox.scrollHeight;
-                    gsap.from(errorBubble, { duration: 1, opacity: 0, x: -60 });
+                    gsap.from(errorBubble, { duration: 0.8, opacity: 0, x: -40 });
                 }
             }
 
