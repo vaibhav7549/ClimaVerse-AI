@@ -1,1 +1,728 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClimaVerse AI - Cosmic Weather & AI Oracle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://unpkg.com/three@0.156.1/build/three.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a23, #1e3a8a);
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+            overflow-x: hidden;
+            position: relative;
+        }
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.7;
+        }
+        #particles-js {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+        .container {
+            position: relative;
+            z-index: 10;
+        }
+        .holographic-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(25px);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 24px;
+            box-shadow: 0 12px 50px rgba(0, 0, 0, 0.4), inset 0 0 25px rgba(0, 255, 255, 0.2);
+            transition: transform 0.6s ease, box-shadow 0.6s ease;
+            transform-style: preserve-3d;
+        }
+        .holographic-card:hover {
+            transform: translateY(-12px) rotateX(10deg) rotateY(5deg);
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5), inset 0 0 35px rgba(0, 255, 255, 0.4);
+        }
+        .suggestion {
+            cursor: pointer;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+        .suggestion:hover {
+            background: rgba(0, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        #map, .chat-map {
+            height: 400px;
+            border-radius: 20px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(0, 255, 255, 0.4);
+        }
+        .input-neon {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            color: #ffffff;
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+            transition: box-shadow 0.4s ease;
+        }
+        .input-neon:focus {
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.9), 0 0 60px rgba(255, 0, 204, 0.6);
+            outline: none;
+        }
+        .button-neon {
+            background: linear-gradient(45deg, #00f7ff, #ff00cc);
+            border: none;
+            border-radius: 16px;
+            padding: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .button-neon:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.9), 0 0 70px rgba(255, 0, 204, 0.6);
+        }
+        .chat-bubble {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+        }
+        .chat-bubble:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+        }
+        .weather-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .recent-city {
+            cursor: pointer;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+        .recent-city:hover {
+            background: rgba(0, 255, 255, 0.4);
+            transform: scale(1.1);
+        }
+        .quick-reply {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 10px 20px;
+            margin: 4px;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+        .quick-reply:hover {
+            background: rgba(0, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        .typing-indicator {
+            display: none;
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .typing-indicator span {
+            animation: blink 1s infinite;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        h1, h2, h3 {
+            font-family: 'Exo 2', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <!-- Three.js Canvas -->
+    <div id="three-canvas"></div>
+
+    <!-- Particle Background -->
+    <div id="particles-js"></div>
+
+    <!-- Weather Animation -->
+    <div id="weatherAnimation" class="weather-animation"></div>
+
+    <!-- Main Container -->
+    <div class="container mx-auto p-10 max-w-7xl mt-16">
+        <header class="text-center mb-20">
+            <h1 class="text-9xl font-bold text-white drop-shadow-[0_0_30px_rgba(0,255,255,0.9)]">ClimaVerse AI</h1>
+            <p class="text-3xl text-white/80 mt-6 font-light">Your Galactic Weather Explorer & AI Oracle</p>
+        </header>
+
+        <!-- Mode Toggle -->
+        <div class="flex justify-center mb-16">
+            <button id="weatherModeBtn" class="px-14 py-5 button-neon text-xl">Weather Cosmos</button>
+            <button id="chatModeBtn" class="px-14 py-5 bg-gray-900 text-white rounded-r-full font-bold text-xl hover:bg-gray-950 transition">AI Nexus</button>
+        </div>
+
+        <!-- Weather Mode -->
+        <div id="weatherMode" class="holographic-card p-14">
+            <h2 class="text-6xl font-bold text-white mb-10 text-center">Explore the Cosmos</h2>
+            <form id="weatherForm" class="relative mb-12">
+                <input type="text" id="cityInput" placeholder="Search a city (e.g., Mumbai)" class="w-full input-neon text-xl" autocomplete="off" required>
+                <div id="suggestions" class="absolute w-full bg-black/95 rounded-2xl shadow-2xl mt-3 max-h-72 overflow-y-auto hidden z-40"></div>
+                <button type="submit" class="w-full mt-6 button-neon text-xl">Discover Weather</button>
+            </form>
+            <div id="recentCities" class="flex flex-wrap gap-6 mb-10 justify-center"></div>
+            <div id="weatherDetails" class="grid grid-cols-1 xl:grid-cols-3 gap-10">
+                <div class="col-span-1 xl:col-span-2 space-y-8">
+                    <div class="flex items-center space-x-10 bg-white/5 p-8 rounded-2xl">
+                        <img id="weatherIcon" src="https://openweathermap.org/img/wn/01d@2x.png" alt="Weather Icon" class="w-32 h-32">
+                        <div>
+                            <p id="cityName" class="text-5xl font-bold text-white">Enter a city</p>
+                            <p id="temperature" class="text-7xl font-extrabold text-white">25°C</p>
+                            <p id="description" class="text-3xl text-white/80 capitalize">Sunny</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-6 text-white/90">
+                        <div class="bg-white/10 p-6 rounded-2xl">Humidity: <span id="humidity">60%</span></div>
+                        <div class="bg-white/10 p-6 rounded-2xl">Wind: <span id="wind">5 m/s</span></div>
+                        <div class="bg-white/10 p-6 rounded-2xl">Pressure: <span id="pressure">1012 hPa</span></div>
+                        <div class="bg-white/10 p-6 rounded-2xl">AQI: <span id="aqi">N/A</span></div>
+                    </div>
+                </div>
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <!-- AI Chat Mode -->
+        <div id="chatMode" class="hidden">
+            <div class="holographic-card p-14 max-h-[800px] overflow-y-auto" id="chatBox">
+                <div class="chat-bubble">
+                    <p class="text-white/90 text-xl">Welcome to ClimaVerse AI! Ask about weather (e.g., "Weather in Tokyo") or dive into the universe!</p>
+                    <span class="text-white/50 text-sm block mt-2">Just now</span>
+                </div>
+            </div>
+            <div class="flex justify-between mt-6">
+                <button id="clearChatBtn" class="px-6 py-3 button-neon text-sm">Clear Chat</button>
+                <button id="exportChatBtn" class="px-6 py-3 button-neon text-sm">Export Chat</button>
+            </div>
+            <div class="typing-indicator">
+                ClimaVerse AI is thinking<span>.</span><span>.</span><span>.</span>
+            </div>
+            <div id="quickReplies" class="flex flex-wrap gap-4 mt-6 justify-center"></div>
+            <form id="chatForm" class="relative mt-6">
+                <input type="text" id="chatInput" name="content" placeholder="Ask about weather or anything..." class="w-full input-neon text-xl" required>
+                <button type="submit" class="w-full mt-6 button-neon text-xl">Send Query</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Three.js 3D Background
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById("three-canvas").appendChild(renderer.domElement);
+        const geometry = new THREE.SphereGeometry(0.5, 32, 32);
+        const material = new THREE.MeshBasicMaterial({ color: 0x00f7ff, wireframe: true });
+        const spheres = [];
+        for (let i = 0; i < 50; i++) {
+            const sphere = new THREE.Mesh(geometry, material);
+            sphere.position.set(
+                (Math.random() - 0.5) * 100,
+                (Math.random() - 0.5) * 100,
+                (Math.random() - 0.5) * 100
+            );
+            scene.add(sphere);
+            spheres.push(sphere);
+        }
+        camera.position.z = 50;
+        function animate() {
+            requestAnimationFrame(animate);
+            spheres.forEach(s => {
+                s.rotation.x += 0.01;
+                s.rotation.y += 0.01;
+            });
+            renderer.render(scene, camera);
+        }
+        animate();
+        window.addEventListener("resize", () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Particles.js
+        particlesJS("particles-js", {
+            particles: {
+                number: { value: 120, density: { enable: true, value_area: 1200 } },
+                color: { value: ["#00f7ff", "#ff00cc", "#ffffff"] },
+                shape: { type: "circle" },
+                opacity: { value: 0.7, random: true },
+                size: { value: 5, random: true },
+                line_linked: { enable: true, distance: 200, color: "#00f7ff", opacity: 0.4, width: 1.5 },
+                move: { enable: true, speed: 4, direction: "none", random: true }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: true, mode: "push" } },
+                modes: { grab: { distance: 250, line_linked: { opacity: 0.6 } }, push: { particles_nb: 5 } }
+            }
+        });
+
+        // GSAP Animations
+        gsap.from(".container", { duration: 1.8, y: 200, opacity: 0, ease: "power4.out" });
+        gsap.from("header", { duration: 1.5, delay: 0.5, opacity: 0, scale: 0.6, ease: "back.out(3)" });
+        gsap.from(".holographic-card", { duration: 1.2, delay: 1, opacity: 0, y: 100, stagger: 0.4, ease: "power3.out" });
+
+        // Initialize Leaflet Map
+        const map = L.map('map').setView([51.505, -0.09], 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            maxZoom: 18,
+        }).addTo(map);
+        let marker;
+
+        // Recent Cities
+        let recentCities = JSON.parse(localStorage.getItem("recentCities") || "[]");
+        function updateRecentCities(city, lat, lon) {
+            recentCities = recentCities.filter(c => c.city !== city);
+            recentCities.unshift({ city, lat, lon });
+            if (recentCities.length > 5) recentCities.pop();
+            localStorage.setItem("recentCities", JSON.stringify(recentCities));
+            renderRecentCities();
+        }
+        function renderRecentCities() {
+            const recentCitiesDiv = document.getElementById("recentCities");
+            recentCitiesDiv.innerHTML = recentCities.length ? "<h3 class='text-2xl text-white/80 mb-6 text-center'>Recent Searches</h3>" : "";
+            recentCities.forEach(({ city, lat, lon }) => {
+                const div = document.createElement("div");
+                div.className = "recent-city text-white/90 text-lg";
+                div.textContent = city;
+                div.addEventListener("click", () => fetchWeather(lat, lon, city, false));
+                recentCitiesDiv.appendChild(div);
+            });
+            gsap.from(".recent-city", { duration: 0.6, opacity: 0, x: -30, stagger: 0.2 });
+        }
+        renderRecentCities();
+
+        // Quick Replies
+        const quickReplies = [
+            "Weather in Mumbai",
+            "Weather in Tokyo",
+            "Tell me about AI",
+            "What is the universe?"
+        ];
+        function renderQuickReplies() {
+            const quickRepliesDiv = document.getElementById("quickReplies");
+            quickRepliesDiv.innerHTML = "";
+            quickReplies.forEach(reply => {
+                const btn = document.createElement("button");
+                btn.className = "quick-reply text-white/90 text-lg";
+                btn.textContent = reply;
+                btn.addEventListener("click", () => {
+                    document.getElementById("chatInput").value = reply;
+                    document.getElementById("chatForm").dispatchEvent(new Event("submit"));
+                });
+                quickRepliesDiv.appendChild(btn);
+            });
+            gsap.from(".quick-reply", { duration: 0.6, opacity: 0, y: 20, stagger: 0.2 });
+        }
+        renderQuickReplies();
+
+        // Toggle Modes
+        const weatherModeBtn = document.getElementById("weatherModeBtn");
+        const chatModeBtn = document.getElementById("chatModeBtn");
+        const weatherMode = document.getElementById("weatherMode");
+        const chatMode = document.getElementById("chatMode");
+
+        weatherModeBtn.addEventListener("click", () => {
+            weatherMode.classList.remove("hidden");
+            chatMode.classList.add("hidden");
+            weatherModeBtn.classList.replace("bg-gray-900", "button-neon");
+            chatModeBtn.classList.replace("button-neon", "bg-gray-900");
+            gsap.from("#weatherMode", { duration: 1, opacity: 0, y: 100, ease: "power3.out" });
+        });
+
+        chatModeBtn.addEventListener("click", () => {
+            chatMode.classList.remove("hidden");
+            weatherMode.classList.add("hidden");
+            chatModeBtn.classList.replace("bg-gray-900", "button-neon");
+            weatherModeBtn.classList.replace("button-neon", "bg-gray-900");
+            gsap.from("#chatMode", { duration: 1, opacity: 0, y: 100, ease: "power3.out" });
+        });
+
+        // City Suggestions
+        const cityInput = document.getElementById("cityInput");
+        const suggestions = document.getElementById("suggestions");
+        const fetchSuggestions = _.debounce(async (query) => {
+            if (query.length < 2) {
+                suggestions.classList.add("hidden");
+                suggestions.innerHTML = "";
+                return;
+            }
+            try {
+                const response = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const cities = await response.json();
+                suggestions.innerHTML = "";
+                if (cities.length > 0) {
+                    cities.forEach(city => {
+                        const div = document.createElement("div");
+                        div.className = "suggestion text-white/90 text-lg";
+                        div.textContent = `${city.name}, ${city.country}${city.state ? `, ${city.state}` : ""}`;
+                        div.dataset.lat = city.lat;
+                        div.dataset.lon = city.lon;
+                        div.addEventListener("click", () => {
+                            cityInput.value = city.name;
+                            suggestions.classList.add("hidden");
+                            fetchWeather(city.lat, city.lon, city.name, false);
+                        });
+                        suggestions.appendChild(div);
+                    });
+                    suggestions.classList.remove("hidden");
+                    gsap.from(".suggestion", { duration: 0.5, opacity: 0, y: 20, stagger: 0.15 });
+                } else {
+                    suggestions.innerHTML = '<div class="p-5 text-white/80 text-lg">No cities found</div>';
+                    suggestions.classList.remove("hidden");
+                }
+            } catch (error) {
+                console.error("Error fetching city suggestions:", error);
+                suggestions.innerHTML = '<div class="p-5 text-white/80 text-lg">Error fetching suggestions</div>';
+                suggestions.classList.remove("hidden");
+            }
+        }, 300);
+
+        cityInput.addEventListener("input", () => fetchSuggestions(cityInput.value.trim()));
+        document.addEventListener("click", (e) => {
+            if (!cityInput.contains(e.target) && !suggestions.contains(e.target)) {
+                suggestions.classList.add("hidden");
+            }
+        });
+
+        // Fetch Weather
+        async function fetchWeather(lat, lon, cityName, isChat = false) {
+            try {
+                const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const { weather, aqi } = await response.json();
+
+                const weatherInfo = {
+                    city: cityName,
+                    temp: Math.round(weather.main.temp),
+                    description: weather.weather[0].description,
+                    icon: `https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`,
+                    humidity: weather.main.humidity,
+                    wind: weather.wind.speed,
+                    pressure: weather.main.pressure,
+                    aqi: aqi.list[0].main.aqi,
+                    aqiText: ["Good", "Fair", "Moderate", "Poor", "Very Poor"][aqi.list[0].main.aqi - 1]
+                };
+
+                if (isChat) {
+                    const chatBox = document.getElementById("chatBox");
+                    const weatherBubble = document.createElement("div");
+                    weatherBubble.className = "chat-bubble";
+                    weatherBubble.innerHTML = `
+                        <div class="bg-white/10 p-8 rounded-2xl">
+                            <h3 class="text-3xl font-bold text-white">${weatherInfo.city}</h3>
+                            <div class="flex items-center space-x-8 mt-6">
+                                <img src="${weatherInfo.icon}" alt="Weather Icon" class="w-24 h-24">
+                                <div>
+                                    <p class="text-5xl font-bold text-white">${weatherInfo.temp}°C</p>
+                                    <p class="text-2xl text-white/80 capitalize">${weatherInfo.description}</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-6 mt-8 text-white/90">
+                                <p>Humidity: ${weatherInfo.humidity}%</p>
+                                <p>Wind: ${weatherInfo.wind} m/s</p>
+                                <p>Pressure: ${weatherInfo.pressure} hPa</p>
+                                <p>AQI: ${weatherInfo.aqiText} (${weatherInfo.aqi})</p>
+                            </div>
+                            <div id="chatMap-${lat}-${lon}" class="chat-map mt-8"></div>
+                            <span class="text-white/50 text-sm block mt-4">${new Date().toLocaleString()}</span>
+                        </div>
+                    `;
+                    chatBox.appendChild(weatherBubble);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+
+                    const chatMap = L.map(`chatMap-${lat}-${lon}`).setView([lat, lon], 10);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                        maxZoom: 18,
+                    }).addTo(chatMap);
+                    L.marker([lat, lon]).addTo(chatMap)
+                        .bindPopup(`<b>${cityName}</b><br>${weatherInfo.description}`)
+                        .openPopup();
+
+                    gsap.from(weatherBubble, { duration: 1, opacity: 0, x: -60, ease: "power3.out" });
+                } else {
+                    document.getElementById("cityName").textContent = weatherInfo.city;
+                    document.getElementById("temperature").textContent = `${weatherInfo.temp}°C`;
+                    document.getElementById("description").textContent = weatherInfo.description;
+                    document.getElementById("weatherIcon").src = weatherInfo.icon;
+                    document.getElementById("humidity").textContent = `${weatherInfo.humidity}%`;
+                    document.getElementById("wind").textContent = `${weatherInfo.wind} m/s`;
+                    document.getElementById("pressure").textContent = `${weatherInfo.pressure} hPa`;
+                    document.getElementById("aqi").textContent = `${weatherInfo.aqiText} (${weatherInfo.aqi})`;
+
+                    map.setView([lat, lon], 10);
+                    if (marker) map.removeLayer(marker);
+                    marker = L.marker([lat, lon]).addTo(map)
+                        .bindPopup(`<b>${cityName}</b><br>${weatherInfo.description}`)
+                        .openPopup();
+
+                    updateRecentCities(cityName, lat, lon);
+                    gsap.from("#weatherDetails", { duration: 1, opacity: 0, y: 60, ease: "power3.out" });
+                }
+
+                updateWeatherAnimation(weatherInfo.description);
+            } catch (error) {
+                console.error("Error fetching weather data:", error);
+                if (isChat) {
+                    const chatBox = document.getElementById("chatBox");
+                    const errorBubble = document.createElement("div");
+                    errorBubble.className = "chat-bubble";
+                    errorBubble.innerHTML = `
+                        <p class="text-white/90 text-xl">Unable to fetch weather for ${cityName}. Please try again!</p>
+                        <span class="text-white/50 text-sm block mt-4">${new Date().toLocaleString()}</span>
+                    `;
+                    chatBox.appendChild(errorBubble);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    gsap.from(errorBubble, { duration: 1, opacity: 0, x: -60 });
+                } else {
+                    alert("Unable to fetch weather data. Please try another city.");
+                }
+            }
+        }
+
+        // Weather Animation
+        function updateWeatherAnimation(description) {
+            const weatherAnimation = document.getElementById("weatherAnimation");
+            weatherAnimation.innerHTML = "";
+            if (description.includes("rain")) {
+                for (let i = 0; i < 120; i++) {
+                    const drop = document.createElement("div");
+                    drop.className = "absolute bg-cyan-300/60 w-1.5 h-8 rounded";
+                    drop.style.left = `${Math.random() * 100}%`;
+                    drop.style.top = `${Math.random() * 100}%`;
+                    drop.style.animation = `rain 0.7s linear infinite`;
+                    drop.style.animationDelay = `${Math.random()}s`;
+                    weatherAnimation.appendChild(drop);
+                }
+                const style = document.createElement("style");
+                style.textContent = `
+                    @keyframes rain {
+                        0% { transform: translateY(-30px); opacity: 1; }
+                        100% { transform: translateY(100vh); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            } else if (description.includes("snow")) {
+                for (let i = 0; i < 100; i++) {
+                    const flake = document.createElement("div");
+                    flake.className = "absolute bg-white w-3 h-3 rounded-full";
+                    flake.style.left = `${Math.random() * 100}%`;
+                    flake.style.top = `${Math.random() * 100}%`;
+                    flake.style.animation = `snow 2.5s linear infinite`;
+                    flake.style.animationDelay = `${Math.random() * 2}s`;
+                    weatherAnimation.appendChild(flake);
+                }
+                const style = document.createElement("style");
+                style.textContent = `
+                    @keyframes snow {
+                        0% { transform: translateY(-30px); opacity: 1; }
+                        100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            } else if (description.includes("clear") || description.includes("sun")) {
+                weatherAnimation.style.background = "radial-gradient(circle at top, rgba(255, 235, 59, 0.4), transparent)";
+                for (let i = 0; i < 20; i++) {
+                    const flare = document.createElement("div");
+                    flare.className = "absolute bg-yellow-300/30 w-4 h-4 rounded-full";
+                    flare.style.left = `${Math.random() * 100}%`;
+                    flare.style.top = `${Math.random() * 100}%`;
+                    flare.style.animation = `flare 3s ease-in-out infinite`;
+                    flare.style.animationDelay = `${Math.random() * 2}s`;
+                    weatherAnimation.appendChild(flare);
+                }
+                const style = document.createElement("style");
+                style.textContent = `
+                    @keyframes flare {
+                        0%, 100% { transform: scale(1); opacity: 0.3; }
+                        50% { transform: scale(1.5); opacity: 0.8; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        // Weather Form Submission
+        const weatherForm = document.getElementById("weatherForm");
+        weatherForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const city = cityInput.value.trim();
+            try {
+                const response = await fetch(`/api/geocode?q=${encodeURIComponent(city)}`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const cities = await response.json();
+                if (cities.length > 0) {
+                    const { lat, lon, name } = cities[0];
+                    fetchWeather(lat, lon, name, false);
+                } else {
+                    alert("City not found! Please try another city.");
+                }
+            } catch (error) {
+                console.error("Error fetching city data:", error);
+                alert("Error fetching city data. Please try again.");
+            }
+        });
+
+        // AI Chat Features
+        const chatForm = document.getElementById("chatForm");
+        const chatBox = document.getElementById("chatBox");
+        const typingIndicator = document.querySelector(".typing-indicator");
+        const clearChatBtn = document.getElementById("clearChatBtn");
+        const exportChatBtn = document.getElementById("exportChatBtn");
+
+        clearChatBtn.addEventListener("click", () => {
+            chatBox.innerHTML = `
+                <div class="chat-bubble">
+                    <p class="text-white/90 text-xl">Welcome to ClimaVerse AI! Ask about weather (e.g., "Weather in Tokyo") or dive into the universe!</p>
+                    <span class="text-white/50 text-sm block mt-2">${new Date().toLocaleString()}</span>
+                </div>
+            `;
+            gsap.from(".chat-bubble", { duration: 1, opacity: 0, y: 50 });
+        });
+
+        exportChatBtn.addEventListener("click", () => {
+            const messages = Array.from(chatBox.querySelectorAll(".chat-bubble")).map(bubble => {
+                const text = bubble.querySelector("p").textContent;
+                const time = bubble.querySelector("span")?.textContent || "";
+                return `${time}: ${text}`;
+            }).join("\n\n");
+            const blob = new Blob([messages], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `ClimaVerseAI_Chat_${new Date().toISOString().split("T")[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        chatForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const userInput = document.getElementById("chatInput").value.trim();
+
+            const userBubble = document.createElement("div");
+            userBubble.className = "chat-bubble text-right";
+            userBubble.innerHTML = `
+                <p class="text-white/90 text-xl">${userInput}</p>
+                <span class="text-white/50 text-sm block mt-2">${new Date().toLocaleString()}</span>
+            `;
+            chatBox.appendChild(userBubble);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            gsap.from(userBubble, { duration: 1, opacity: 0, x: 60 });
+
+            typingIndicator.style.display = "block";
+            gsap.from(".typing-indicator", { duration: 0.6, opacity: 0 });
+
+            const weatherRegex = /(weather|forecast)\s+(in|for|at)\s+([a-zA-Z\s]+)/i;
+            const match = userInput.match(weatherRegex);
+            if (match) {
+                const city = match[3].trim();
+                try {
+                    const response = await fetch(`/api/geocode?q=${encodeURIComponent(city)}`);
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    const cities = await response.json();
+                    if (cities.length > 0) {
+                        const { lat, lon, name } = cities[0];
+                        await fetchWeather(lat, lon, name, true);
+                    } else {
+                        const errorBubble = document.createElement("div");
+                        errorBubble.className = "chat-bubble";
+                        errorBubble.innerHTML = `
+                            <p class="text-white/90 text-xl">City "${city}" not found. Try another city!</p>
+                            <span class="text-white/50 text-sm block mt-2">${new Date().toLocaleString()}</span>
+                        `;
+                        chatBox.appendChild(errorBubble);
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                        gsap.from(errorBubble, { duration: 1, opacity: 0, x: -60 });
+                    }
+                } catch (error) {
+                    console.error("Error fetching city data:", error);
+                    const errorBubble = document.createElement("div");
+                    errorBubble.className = "chat-bubble";
+                    errorBubble.innerHTML = `
+                        <p class="text-white/90 text-xl">Error fetching weather for "${city}". Please try again!</p>
+                        <span class="text-white/50 text-sm block mt-2">${new Date().toLocaleString()}</span>
+                    `;
+                    chatBox.appendChild(errorBubble);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    gsap.from(errorBubble, { duration: 1, opacity: 0, x: -60 });
+                }
+            } else {
+                try {
+                    const response = await fetch("/", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: `content=${encodeURIComponent(userInput)}`
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    const aiResponse = await response.text();
+
+                    const aiBubble = document.createElement("div");
+                    aiBubble.className = "chat-bubble";
+                    aiBubble.innerHTML = `
+                        <p class="text-white/90 text-xl">${aiResponse || "Error: No response"}</p>
+                        <span class="text-white/50 text-sm block mt-2">${new Date().toLocaleString()}</span>
+                    `;
+                    chatBox.appendChild(aiBubble);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    gsap.from(aiBubble, { duration: 1, opacity: 0, x: -60 });
+                } catch (error) {
+                    console.error("Error fetching AI response:", error);
+                    const errorBubble = document.createElement("div");
+                    errorBubble.className = "chat-bubble";
+                    errorBubble.innerHTML = `
+                        <p class="text-white/90 text-xl">Error: Could not connect to AI</p>
+                        <span class="text-white/50 text-sm block mt-2">${new Date().toLocaleString()}</span>
+                    `;
+                    chatBox.appendChild(errorBubble);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    gsap.from(errorBubble, { duration: 1, opacity: 0, x: -60 });
+                }
+            }
+
+            typingIndicator.style.display = "none";
+            chatForm.reset();
+        });
+    </script>
+</body>
+</html>
