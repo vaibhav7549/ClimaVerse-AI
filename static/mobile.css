@@ -1,0 +1,266 @@
+/* Mobile-specific overrides for ClimaVerse AI */
+@media (max-width: 767px) {
+    /* Reset large Tailwind sizes */
+    .container {
+        padding: clamp(0.5rem, 3vmin, 1rem) !important;
+        margin-top: 0 !important;
+        max-width: 100% !important;
+    }
+
+    header {
+        margin-bottom: clamp(1rem, 4vmin, 1.5rem) !important;
+    }
+
+    h1 {
+        font-size: clamp(1.5rem, 6vmin, 2.5rem) !important;
+        line-height: 1.2;
+    }
+
+    p.text-3xl {
+        font-size: clamp(0.8rem, 3vmin, 1rem) !important;
+    }
+
+    .mb-20 {
+        margin-bottom: clamp(1.5rem, 5vmin, 2rem) !important;
+    }
+
+    .mb-16 {
+        margin-bottom: clamp(1rem, 4vmin, 1.5rem) !important;
+    }
+
+    .holographic-card {
+        padding: clamp(0.5rem, 2.5vmin, 1rem) !important;
+        border-radius: clamp(0.4rem, 1.5vmin, 0.6rem) !important;
+    }
+
+    #weatherMode, #chatMode {
+        padding: clamp(0.5rem, 2.5vmin, 1rem) !important;
+    }
+
+    h2 {
+        font-size: clamp(1.2rem, 4.5vmin, 1.8rem) !important;
+        margin-bottom: clamp(0.5rem, 2vmin, 0.75rem) !important;
+    }
+
+    #weatherForm, #chatForm {
+        margin-bottom: clamp(0.5rem, 2vmin, 1rem) !important;
+    }
+
+    .input-neon, .button-neon {
+        padding: clamp(0.4rem, 2vmin, 0.6rem) !important;
+        font-size: clamp(0.8rem, 2vmin, 0.9rem) !important;
+        min-height: 44px !important;
+    }
+
+    #suggestions {
+        max-height: 40vh !important;
+        margin-top: clamp(0.2rem, 1vmin, 0.3rem) !important;
+        border-radius: clamp(0.3rem, 1.2vmin, 0.5rem) !important;
+    }
+
+    .suggestion {
+        padding: clamp(0.3rem, 1.5vmin, 0.5rem) !important;
+        font-size: clamp(0.75rem, 1.8vmin, 0.85rem) !important;
+    }
+
+    #recentCities {
+        gap: clamp(0.3rem, 1.2vmin, 0.5rem) !important;
+        margin-bottom: clamp(0.5rem, 2vmin, 1rem) !important;
+    }
+
+    .recent-city {
+        padding: clamp(0.3rem, 1.2vmin, 0.5rem) !important;
+        font-size: clamp(0.75rem, 1.8vmin, 0.85rem) !important;
+        min-height: 44px !important;
+    }
+
+    #weatherDetails {
+        grid-template-columns: 1fr !important;
+        gap: clamp(0.3rem, 1.2vmin, 0.5rem) !important;
+    }
+
+    #weatherDetails > div:first-child {
+        space-y: clamp(0.3rem, 1.2vmin, 0.5rem) !important;
+    }
+
+    .flex.items-center.space-x-10 {
+        flex-direction: row;
+        align-items: center;
+        space-x: clamp(0.5rem, 2vmin, 1rem) !important;
+        padding: clamp(0.5rem, 2vmin, 1rem) !important;
+        border-radius: clamp(0.3rem, 1.2vmin, 0.5rem) !important;
+    }
+
+    #weatherIcon {
+        width: clamp(2rem, 10vmin, 3rem) !important;
+        height: clamp(2rem, 10vmin, 3rem) !important;
+    }
+
+    #cityName {
+        font-size: clamp(1rem, 4vmin, 1.5rem) !important;
+    }
+
+    #temperature {
+        font-size: clamp(1.5rem, 6vmin, 2rem) !important;
+    }
+
+    #description {
+        font-size: clamp(0.8rem, 3vmin, 1rem) !important;
+    }
+
+    .grid.grid-cols-2 {
+        gap: clamp(0.3rem, 1.2vmin, 0.5rem) !important;
+    }
+
+    .grid.grid-cols-2 > div {
+        padding: clamp(0.3rem, 1.2vmin, 0.5rem) !important;
+        font-size: clamp(0.7rem, 1.8vmin, 0.8rem) !important;
+        border-radius: clamp(0.3rem, 1.2vmin, 0.5rem) !important;
+    }
+
+    #map, .chat-map {
+        height: clamp(80px, 25vh, 150px) !important;
+        margin-top: clamp(0.5rem, 2vmin, 1rem) !important;
+    }
+
+    #chatBox {
+        max-height: 60vh !important;
+        padding: clamp(0.5rem, 2vmin, 1rem) !important;
+    }
+
+    .chat-bubble {
+        padding: clamp(0.3rem, 1.5vmin, 0.5rem) !important;
+        font-size: clamp(0.75rem, 1.8vmin, 0.85rem) !important;
+        border-radius: clamp(0.3rem, 1.2vmin, 0.5rem) !important;
+    }
+
+    .chat-bubble p {
+        font-size: clamp(0.75rem, 1.8vmin, 0.85rem) !important;
+    }
+
+    .chat-bubble span {
+        font-size: clamp(0.6rem, 1.5vmin, 0.7rem) !important;
+    }
+
+    .chat-bubble .bg-white\/10 {
+        padding: clamp(0.5rem, 2vmin, 1rem) !important;
+        border-radius: clamp(0.3rem, 1.2vmin, 0.5rem) !important;
+    }
+
+    .chat-bubble h3 {
+        font-size: clamp(1rem, 3.5vmin, 1.2rem) !important;
+    }
+
+    .chat-bubble .flex.items-center {
+        space-x: clamp(0.5rem, 2vmin, 1rem) !important;
+        margin-top: clamp(0.3rem, 1.2vmin, 0.5rem) !important;
+    }
+
+    .chat-bubble img {
+        width: clamp(2rem, 8vmin, 2.5rem) !important;
+        height: clamp(2rem, 8vmin, 2.5rem) !important;
+    }
+
+    .chat-bubble .text-5xl {
+        font-size: clamp(1.2rem, 4.5vmin, 1.5rem) !important;
+    }
+
+    .chat-bubble .text-2xl {
+        font-size: clamp(0.8rem, 3vmin, 1rem) !important;
+    }
+
+    .chat-bubble .grid.grid-cols-2 {
+        margin-top: clamp(0.5rem, 2vmin, 1rem) !important;
+    }
+
+    .chat-bubble .grid.grid-cols-2 p {
+        font-size: clamp(0.7rem, 1.8vmin, 0.8rem) !important;
+    }
+
+    .quick-reply {
+        padding: clamp(0.3rem, 1.2vmin, 0.5rem) !important;
+        font-size: clamp(0.75rem, 1.8vmin, 0.85rem) !important;
+        margin: clamp(0.2rem, 1vmin, 0.3rem) !important;
+        min-height: 44px !important;
+    }
+
+    .typing-indicator {
+        font-size: clamp(0.75rem, 1.8vmin, 0.85rem) !important;
+        margin-bottom: clamp(0.3rem, 1.2vmin, 0.5rem) !important;
+    }
+
+    /* Accessibility */
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+    }
+
+    .button-neon:focus,
+    .input-neon:focus,
+    .suggestion:focus,
+    .recent-city:focus,
+    .quick-reply:focus {
+        outline: 2px solid rgba(0, 255, 255, 0.8);
+        outline-offset: 2px;
+    }
+
+    /* Prevent hover effects on touch devices */
+    .button-neon:hover,
+    .suggestion:hover,
+    .recent-city:hover,
+    .quick-reply:hover,
+    .chat-bubble:hover,
+    .holographic-card:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Ensure touch feedback */
+    .button-neon:active,
+    .suggestion:active,
+    .recent-city:active,
+    .quick-reply:active,
+    .chat-bubble:active {
+        transform: scale(0.95) !important;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+    .container {
+        padding: clamp(0.3rem, 2vmin, 0.5rem) !important;
+    }
+
+    h1 {
+        font-size: clamp(1.2rem, 5vmin, 2rem) !important;
+    }
+
+    .input-neon, .button-neon {
+        padding: clamp(0.3rem, 1.5vmin, 0.5rem) !important;
+        font-size: clamp(0.7rem, 1.8vmin, 0.8rem) !important;
+    }
+
+    #map, .chat-map {
+        height: clamp(70px, 20vh, 120px) !important;
+    }
+}
+
+@media (max-width: 320px) {
+    body {
+        font-size: clamp(10px, 2vmin, 11px) !important;
+    }
+
+    h1 {
+        font-size: clamp(1rem, 4.5vmin, 1.8rem) !important;
+    }
+
+    .holographic-card {
+        padding: clamp(0.3rem, 1.5vmin, 0.5rem) !important;
+    }
+}
