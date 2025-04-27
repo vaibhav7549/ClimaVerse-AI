@@ -71,6 +71,5 @@ def weather():
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 if __name__ == "__main__":
-    app.run(debug=True, ssl_context=('server.crt', 'server.key'))
+    app.run(debug=True)  # Remove ssl_context=('server.crt', 'server.key')
