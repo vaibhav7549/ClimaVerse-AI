@@ -201,7 +201,6 @@ ClimaVerse-AI/
 ├── static/                   # Static assets
 │   ├── index.html            # Main frontend file
 │   ├── mobile.css            # Mobile-specific CSS
-│   ├── banner.png            # Website banner (to be uploaded)
 ├── transport_data.csv        # Travel route and mode data
 ├── server.crt                # SSL certificate (generate locally)
 ├── server.key                # SSL key (generate locally)
