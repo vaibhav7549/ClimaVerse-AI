@@ -1,4 +1,4 @@
-# ClimaVerse AI
+# ClimaVerse AI  
 
 
 ClimaVerse AI is an advanced web application that integrates real-time weather forecasting, eco-friendly travel planning, and AI-driven chat functionality. Built with modern web technologies, APIs, and machine learning, it offers a visually immersive and responsive interface for users to explore weather conditions, plan sustainable trips, and interact with an AI oracle.
