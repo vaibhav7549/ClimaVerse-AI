@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -513,6 +512,45 @@ h3 {
                 </div>
                 <div id="map" class="mt-4"></div>
             </div>
+          <!-- Eco-Friendly Travel Planner with Weather Adjustment and City Suggestions -->
+<div class="holographic-card p-4 sm:p-14 mt-4 sm:mt-10">
+    <h2 class="text-2xl sm:text-6xl font-bold mb-4 sm:mb-10 text-center">Eco-Friendly Travel Planner</h2>
+    <form id="travelForm" class="relative mb-4 sm:mb-12">
+        <h3 class="text-lg sm:text-2xl font-exo mb-2 sm:mb-4 text-cyan-300">Enter Start Location</h3>
+        <div class="relative">
+            <label for="startLocation" class="sr-only">Start Location</label>
+            <input type="text" id="startLocation" placeholder="e.g., New York City" class="w-full input-neon text-base sm:text-xl" autocomplete="off" required aria-required="true">
+            <div id="startSuggestions" class="absolute w-full bg-black/95 rounded-lg shadow-lg mt-1 sm:mt-3 max-h-48 sm:max-h-72 overflow-y-auto hidden z-40"></div>
+        </div>
+        <h3 class="text-lg sm:text-2xl font-exo mb-2 sm:mb-4 text-cyan-300 mt-4 sm:mt-6">Enter Destination</h3>
+        <div class="relative">
+            <label for="destination" class="sr-only">Destination</label>
+            <input type="text" id="destination" placeholder="e.g., Boston" class="w-full input-neon text-base sm:text-xl" autocomplete="off" required aria-required="true">
+            <div id="destSuggestions" class="absolute w-full bg-black/95 rounded-lg shadow-lg mt-1 sm:mt-3 max-h-48 sm:max-h-72 overflow-y-auto hidden z-40"></div>
+        </div>
+        <h3 class="text-lg sm:text-2xl font-exo mb-2 sm:mb-4 text-cyan-300 mt-4 sm:mt-6">Select Preferences</h3>
+        <div>
+            <label for="preferences" class="sr-only">Preferences</label>
+            <select id="preferences" multiple class="w-full input-neon text-base sm:text-xl bg-black/95">
+                <option value="eco-friendly">Eco-Friendly</option>
+                <option value="low cost">Low Cost</option>
+                <option value="fast">Fast</option>
+            </select>
+        </div>
+        <h3 class="text-lg sm:text-2xl font-exo mb-2 sm:mb-4 text-cyan-300 mt-4 sm:mt-6">Select Time Flexibility</h3>
+        <div>
+            <label for="timeFlexibility" class="sr-only">Time Flexibility</label>
+            <select id="timeFlexibility" class="w-full input-neon text-base sm:text-xl bg-black/95">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+            </select>
+        </div>
+        <button type="submit" class="w-full mt-4 button-neon text-base sm:text-xl">Plan Eco-Friendly Trip</button>
+    </form>
+    <div id="travelWeatherStatus" class="mb-4 sm:mb-6 text-sm sm:text-base"></div>
+    <div id="travelResults" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6"></div>
+</div>
         </div>
 
         <!-- AI Chat Mode -->
@@ -1032,6 +1070,184 @@ h3 {
             typingIndicator.style.display = "none";
             chatForm.reset();
         });
+
+
+
+
+
+
+       // Eco-Friendly Travel Planner with Weather Adjustment and City Suggestions
+const travelForm = document.getElementById("travelForm");
+const travelResults = document.getElementById("travelResults");
+const travelWeatherStatus = document.getElementById("travelWeatherStatus");
+const startInput = document.getElementById("startLocation");
+const destInput = document.getElementById("destination");
+const startSuggestions = document.getElementById("startSuggestions");
+const destSuggestions = document.getElementById("destSuggestions");
+
+// Reuse existing fetchSuggestions logic for city suggestions
+const fetchCitySuggestions = _.debounce(async (query, suggestionDiv, inputElement) => {
+    if (query.length < 2) {
+        suggestionDiv.classList.add("hidden");
+        suggestionDiv.innerHTML = "";
+        return;
+    }
+    try {
+        const response = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`);
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const cities = await response.json();
+        suggestionDiv.innerHTML = "";
+        if (cities.length > 0) {
+            cities.forEach(city => {
+                const div = document.createElement("div");
+                div.className = "suggestion text-sm sm:text-lg";
+                div.textContent = `${city.name}, ${city.country}${city.state ? `, ${city.state}` : ""}`;
+                div.dataset.lat = city.lat;
+                div.dataset.lon = city.lon;
+                div.addEventListener("click", () => {
+                    inputElement.value = city.name;
+                    suggestionDiv.classList.add("hidden");
+                });
+                suggestionDiv.appendChild(div);
+            });
+            suggestionDiv.classList.remove("hidden");
+            gsap.from(".suggestion", { duration: 0.5, opacity: 0, y: 20, stagger: 0.15 });
+        } else {
+            suggestionDiv.innerHTML = '<div class="p-2 sm:p-5 text-sm sm:text-lg text-white/80">No cities found</div>';
+            suggestionDiv.classList.remove("hidden");
+        }
+    } catch (error) {
+        console.error("Error fetching city suggestions:", error);
+        suggestionDiv.innerHTML = '<div class="p-2 sm:p-5 text-sm sm:text-lg text-white/80">Error fetching suggestions</div>';
+        suggestionDiv.classList.remove("hidden");
+    }
+}, 300);
+
+// Event listeners for city suggestions
+startInput.addEventListener("input", () => fetchCitySuggestions(startInput.value.trim(), startSuggestions, startInput));
+destInput.addEventListener("input", () => fetchCitySuggestions(destInput.value.trim(), destSuggestions, destInput));
+
+// Hide suggestions when clicking outside
+document.addEventListener("click", (e) => {
+    if (!startInput.contains(e.target) && !startSuggestions.contains(e.target)) {
+        startSuggestions.classList.add("hidden");
+    }
+    if (!destInput.contains(e.target) && !destSuggestions.contains(e.target)) {
+        destSuggestions.classList.add("hidden");
+    }
+});
+
+async function fetchWeatherForCity(city) {
+    try {
+        const geoResponse = await fetch(`/api/geocode?q=${encodeURIComponent(city)}`);
+        if (!geoResponse.ok) throw new Error(`Geocode HTTP error! Status: ${geoResponse.status}`);
+        const cities = await geoResponse.json();
+        if (cities.length === 0) return null;
+
+        const { lat, lon } = cities[0];
+        const weatherResponse = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
+        if (!weatherResponse.ok) throw new Error(`Weather HTTP error! Status: ${weatherResponse.status}`);
+        const { weather } = await weatherResponse.json();
+        return weather.weather[0].description.toLowerCase();
+    } catch (error) {
+        console.error(`Error fetching weather for ${city}:`, error);
+        return null;
+    }
+}
+
+travelForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const start = startInput.value.trim();
+    const dest = destInput.value.trim();
+    const prefs = Array.from(document.getElementById("preferences").selectedOptions).map(opt => opt.value);
+    const timeFlex = document.getElementById("timeFlexibility").value;
+
+    const data = {
+        start_location: start,
+        destination: dest,
+        preferences: prefs,
+        time_flexibility: timeFlex
+    };
+
+    // Fetch weather for start and destination
+    travelWeatherStatus.innerHTML = "";
+    let weatherNotes = [];
+    const startWeather = await fetchWeatherForCity(start);
+    const destWeather = await fetchWeatherForCity(dest);
+    const adverseConditions = ["rain", "snow", "storm"];
+    let avoidModes = [];
+
+    if (startWeather && adverseConditions.some(cond => startWeather.includes(cond))) {
+        avoidModes = ["cycling", "walking"];
+        weatherNotes.push(`Avoided cycling/walking due to ${startWeather} in ${start}`);
+    }
+    if (destWeather && adverseConditions.some(cond => destWeather.includes(cond))) {
+        avoidModes = ["cycling", "walking"];
+        weatherNotes.push(`Avoided cycling/walking due to ${destWeather} in ${dest}`);
+    }
+
+    try {
+        const response = await fetch("/plan_trip", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const result = await response.json();
+
+        travelResults.innerHTML = "";
+        if (result.error) {
+            const errorDiv = document.createElement("div");
+            errorDiv.className = "bg-white/10 p-4 sm:p-6 rounded-lg sm:rounded-2xl text-sm sm:text-base";
+            errorDiv.textContent = result.error;
+            travelResults.appendChild(errorDiv);
+        } else {
+            // Filter out routes with avoided modes
+            let filteredOptions = Object.entries(result).filter(([_, option]) => {
+                const modes = option.transport_mode.toLowerCase();
+                return !avoidModes.some(mode => modes.includes(mode));
+            });
+
+            // If all routes are filtered out, show a fallback message
+            if (filteredOptions.length === 0) {
+                const fallbackDiv = document.createElement("div");
+                fallbackDiv.className = "bg-white/10 p-4 sm:p-6 rounded-lg sm:rounded-2xl text-sm sm:text-base";
+                fallbackDiv.textContent = "No eco-friendly routes available due to adverse weather. Try other transport modes.";
+                travelResults.appendChild(fallbackDiv);
+            } else {
+                // Display up to 3 valid routes
+                filteredOptions.slice(0, 3).forEach(([key, option]) => {
+                    const optionDiv = document.createElement("div");
+                    optionDiv.className = "bg-white/10 p-4 sm:p-6 rounded-lg sm:rounded-2xl";
+                    optionDiv.innerHTML = `
+                        <h3 class="text-lg sm:text-2xl font-bold mb-2">${key.replace('_', ' ').toUpperCase()}</h3>
+                        <p><strong>Transport:</strong> ${option.transport_mode}</p>
+                        <p><strong>Time:</strong> ${option.estimated_time}</p>
+                        <p><strong>Emissions:</strong> ${option.estimated_emissions}</p>
+                        <p><strong>Notes:</strong> ${option.notes}</p>
+                    `;
+                    travelResults.appendChild(optionDiv);
+                });
+            }
+
+            // Display weather status
+            if (weatherNotes.length > 0) {
+                travelWeatherStatus.className = "bg-white/10 p-4 sm:p-6 rounded-lg sm:rounded-2xl text-sm sm:text-base";
+                travelWeatherStatus.textContent = weatherNotes.join(" and ");
+                gsap.from(travelWeatherStatus, { duration: 0.8, opacity: 0, y: 40, ease: "power2.out" });
+            }
+        }
+        gsap.from("#travelResults > div", { duration: 0.8, opacity: 0, y: 40, stagger: 0.2, ease: "power2.out" });
+    } catch (error) {
+        console.error("Error fetching travel plan:", error);
+        travelResults.innerHTML = `
+            <div class="bg-white/10 p-4 sm:p-6 rounded-lg sm:rounded-2xl text-sm sm:text-base">
+                Error planning trip. Please try again!
+            </div>
+        `;
+        gsap.from("#travelResults > div", { duration: 0.8, opacity: 0, y: 40, ease: "power2.out" });
+    }
+});
     </script>
 </body>
 </html>
