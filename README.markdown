@@ -222,13 +222,13 @@ Please ensure your code adheres to PEP 8 (Python) and Prettier (JavaScript/CSS) 
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE.txt) file for details.
 
 ## Contact
 
 - **Author**: Vaibhav Krishna Chaudhari
 - **GitHub**: [vaibhav7549](https://github.com/vaibhav7549)
-- **Email**: [vaibhavchaudhari7549@gmail.com](mailto:vaibhavchaudhari7549@gmail.com) (vaibhavchaudhari7549@gmail.com)
+- **Email**: [vaibhavchaudhari7549@gmail.com](mailto:vaibhavchaudhari7549@gmail.com)
 - **Issues**: [GitHub Issues](https://github.com/vaibhav7549/ClimaVerse-AI/issues)
 
 ---
