@@ -13,11 +13,8 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 CORS(app)  # Enable CORS to prevent issues with frontend requests
 
-# OpenWeatherMap API key
-OPENWEATHER_API_KEY = "f75779a8a6015449da23bf3b9694ba60"
-
-# Gemini API key (replace with your actual key)
-GEMINI_API_KEY = "AIzaSyCN1M-UzpG21EDGz76W1kxrzx7lEZtzTVE"
+OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent"
 
 # Load dataset for travel planner
